@@ -1,15 +1,23 @@
-// src/app/page.js
+// src/app/page.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
+import Image from 'next/image';
+
+interface ProductData {
+  title: string | null;
+  price: number | null;
+  availability: boolean | null;
+  image_url: string | null;
+}
 
 export default function HomePage() {
-  const [url, setUrl] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [productData, setProductData] = useState(null);
-  const [error, setError] = useState(null);
+  const [url, setUrl] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [productData, setProductData] = useState<ProductData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -22,14 +30,14 @@ export default function HomePage() {
         body: JSON.stringify({ url }),
       });
 
-      const data = await res.json();
+      const data: ProductData = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || 'فشل في سحب بيانات المنتج.');
+        throw new Error(data as any);
       }
 
       setProductData(data);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -67,7 +75,13 @@ export default function HomePage() {
           <p><strong>السعر:</strong> {productData.price ? `${productData.price}` : 'غير متوفر'}</p>
           <p><strong>التوافر:</strong> {productData.availability ? 'متوفر' : 'غير متوفر'}</p>
           {productData.image_url && (
-            <img src={productData.image_url} alt={productData.title} style={{ maxWidth: '300px', display: 'block', marginTop: '10px' }} />
+            <Image
+              src={productData.image_url}
+              alt={productData.title || 'Product Image'}
+              width={300}
+              height={300}
+              style={{ display: 'block', marginTop: '10px' }}
+            />
           )}
         </div>
       )}

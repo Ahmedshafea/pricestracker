@@ -1,14 +1,15 @@
-// src/app/api/track-product/route.js
+// src/app/api/track-product/route.ts
+import { NextResponse } from 'next/server';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import prisma from '../../../lib/prisma'; // تأكد من أن المسار صحيح
+import prisma from '../../../lib/prisma';
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const { url } = await request.json();
 
     if (!url) {
-      return Response.json({ message: 'URL is required' }, { status: 400 });
+      return NextResponse.json({ message: 'URL is required' }, { status: 400 });
     }
     
     // سحب البيانات من الرابط
@@ -20,8 +21,6 @@ export async function POST(request) {
     const $ = cheerio.load(data);
     
     // **هام**: هذه المحددات (selectors) هي أمثلة عامة ويجب تعديلها لتناسب المواقع الفعلية
-    // يمكنك الحصول على المحدد الصحيح باستخدام "Inspect" في متصفحك
-    // 
     const title = $('h1.product-title').text().trim() || null;
     const priceText = $('.price-display .value').text().trim() || null;
     const availabilityText = $('.stock-status').text().trim() || null;
@@ -42,9 +41,9 @@ export async function POST(request) {
       },
     });
 
-    return Response.json(product, { status: 200 });
+    return NextResponse.json(product, { status: 200 });
   } catch (error) {
     console.error('Error fetching or parsing product data:', error);
-    return Response.json({ message: 'فشل في سحب بيانات المنتج، الرجاء التأكد من الرابط.', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'فشل في سحب بيانات المنتج، الرجاء التأكد من الرابط.' }, { status: 500 });
   }
 }
