@@ -30,15 +30,22 @@ export default function HomePage() {
         body: JSON.stringify({ url }),
       });
 
-      const data: ProductData = await res.json();
+      // Instead of casting to `any`, check if the response is valid JSON
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data as any);
+        // Now, we correctly throw an Error with a string message
+        throw new Error(data.message || 'فشل في سحب بيانات المنتج.');
       }
 
       setProductData(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) { // Use 'unknown' instead of 'any'
+      // Safely check if the error is an instance of Error
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     } finally {
       setLoading(false);
     }
